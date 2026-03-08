@@ -1,0 +1,452 @@
+@import "../LoginAndRegister/Login.scss";
+
+.feedback-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  animation: fadeIn 0.6s ease-out;
+
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
+}
+
+.feedback-card {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 700px;
+  padding: 40px;
+  position: relative;
+  margin: 20px auto;
+  animation: slideUp 0.5s ease;
+
+  @media (max-width: 768px) {
+    padding: 25px 20px;
+    margin: 10px auto;
+    border-radius: 20px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 20px 15px;
+  }
+}
+
+.back-button {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: none;
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #4361ee;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+
+  .back-icon {
+    font-size: 1.2rem;
+  }
+
+  &:hover {
+    transform: translateX(-5px);
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+}
+
+.feedback-header {
+  text-align: center;
+  margin-bottom: 40px;
+
+  @media (max-width: 768px) {
+    margin-bottom: 30px;
+  }
+}
+
+.feedback-icon {
+  font-size: 4rem;
+  margin-bottom: 15px;
+  animation: bounce 2s infinite;
+
+  @media (max-width: 768px) {
+    font-size: 3rem;
+    margin-bottom: 10px;
+  }
+}
+
+.feedback-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #4361ee;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+  }
+}
+
+.feedback-subtitle {
+  font-size: 1.1rem;
+  color: #6c757d;
+  margin-bottom: 0;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}
+
+.feedback-form {
+  margin-bottom: 30px;
+}
+
+.form-section {
+  margin-bottom: 30px;
+
+  @media (max-width: 768px) {
+    margin-bottom: 25px;
+  }
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 15px;
+
+  .label-icon {
+    font-size: 1.2rem;
+  }
+}
+
+// Feedback Type Grid
+.feedback-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.type-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 10px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 2px solid transparent;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  gap: 8px;
+  width: 100%;
+
+  .type-icon {
+    font-size: 1.8rem;
+    color: #6c757d;
+    transition: color 0.3s ease;
+  }
+
+  .type-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #212529;
+    transition: color 0.3s ease;
+
+    @media (max-width: 768px) {
+      font-size: 0.8rem;
+    }
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    border-color: #4361ee;
+
+    .type-icon {
+      color: #4361ee;
+    }
+
+    .type-label {
+      color: #4361ee;
+    }
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
+    border-color: #ffffff;
+    box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
+
+    .type-icon,
+    .type-label {
+      color: white;
+    }
+
+    &:hover {
+      .type-icon,
+      .type-label {
+        color: white;
+      }
+    }
+  }
+}
+
+// Rating Stars
+.rating-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 16px;
+
+  @media (max-width: 480px) {
+    padding: 15px;
+  }
+}
+
+.stars {
+  display: flex;
+  gap: 10px;
+
+  @media (max-width: 480px) {
+    gap: 5px;
+  }
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  font-size: 2.5rem;
+  color: #d4d4d4;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0 5px;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+
+  &.active {
+    color: #ffb400;
+    text-shadow: 0 0 15px rgba(255, 180, 0, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.8rem;
+  }
+}
+
+.rating-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #6c757d;
+  min-height: 24px;
+
+  @media (max-width: 480px) {
+    font-size: 0.9rem;
+  }
+}
+
+// Form Inputs
+.feedback-textarea,
+.feedback-input {
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid #e9ecef;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    padding: 12px 15px;
+    font-size: 0.95rem;
+  }
+}
+
+.feedback-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.char-counter {
+  text-align: right;
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-top: 5px;
+}
+
+// Submit Button
+.submit-btn {
+  width: 100%;
+  padding: 16px 30px;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(76, 175, 80, 0.4);
+  }
+
+  @media (max-width: 768px) {
+    padding: 14px 25px;
+    font-size: 1rem;
+  }
+}
+
+.feedback-footer {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 2px solid rgba(67, 97, 238, 0.1);
+}
+
+.footer-note {
+  font-size: 0.9rem;
+  color: #6c757d;
+  font-style: italic;
+
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+}
+
+// Success Page Styles
+.success-content {
+  text-align: center;
+  padding: 20px 0;
+
+  @media (max-width: 480px) {
+    padding: 10px 0;
+  }
+}
+
+.success-animation {
+  margin-bottom: 30px;
+}
+
+.checkmark-circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  animation: scaleIn 0.5s ease;
+
+  @media (max-width: 480px) {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+.checkmark {
+  font-size: 3rem;
+  color: white;
+  animation: fadeIn 0.5s ease 0.2s both;
+
+  @media (max-width: 480px) {
+    font-size: 2.5rem;
+  }
+}
+
+.success-message {
+  font-size: 1.2rem;
+  color: #212529;
+  margin-bottom: 30px;
+  line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
+}
+
+.done-btn {
+  padding: 15px 40px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
+  color: white;
+  box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(67, 97, 238, 0.4);
+  }
+
+  @media (max-width: 768px) {
+    padding: 12px 30px;
+    font-size: 1rem;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}

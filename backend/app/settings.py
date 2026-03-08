@@ -14,13 +14,13 @@ from pathlib import Path
 from decouple import config
 
 GOOGLE_CLIENT_ID = config("GOOGLE_CLIENT_ID")
-GOOGLE_SECRET = config("GOOGLE_SECRET")
+GOOGLE_CLIENT_SECRET = config("GOOGLE_CLIENT_SECRET")
 GITHUB_CLIENT_ID = config("GITHUB_CLIENT_ID")
 GITHUB_SECRET = config("GITHUB_SECRET")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+SITE_ID = 1
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -39,39 +39,49 @@ ACCOUNT_UNIQUE_EMAIL = True
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework.authtoken',
-    'rest_framework_simplejwt',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",             # ✅ THIS LINE
+    "rest_framework",
+    "rest_framework.authtoken",
+    "rest_framework_simplejwt",
     "corsheaders",
-    'dj_rest_auth',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',
+    "dj_rest_auth",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     "excuses",
-    "users"
+    "users",
 ]
 
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 SOCIALACCOUNT_PROVIDERS = {
-    "google": {
-        "APP": {"client_id": GOOGLE_CLIENT_ID, "secret": GOOGLE_SECRET, "key": ""}
-    },
-    "github": {
-        "APP": {"client_id": GITHUB_CLIENT_ID, "secret": GITHUB_SECRET, "key": ""}
-    },
+    'google': {
+        'APP': {
+            'client_id': GOOGLE_CLIENT_ID,
+            'secret': GOOGLE_CLIENT_SECRET,
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
 }
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -80,6 +90,18 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware"
 ]
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
+# LOGIN_REDIRECT_URL = 'http://10.251.10.209:5173/profile'
+# LOGIN_REDIRECT_URL = 'http://localhost:5173/profile'
+LOGIN_REDIRECT_URL = '/auth/simple/social/complete/' 
+# "http://10.251.10.209:5173/"
+# SOCIALACCOUNT_LOGIN_REDIRECT_URL = "http://10.251.10.209:5173/profile"
+SOCIALACCOUNT_LOGIN_REDIRECT_URL = "http://localhost:5173/profile"
+
+
+
 
 ROOT_URLCONF = 'app.urls'
 
@@ -119,7 +141,6 @@ DATABASES = {
     }
 }
 
-SITE_ID = 1
 ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -141,22 +162,22 @@ REST_AUTH = {
 
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173",
-    "http://127.0.0.1:5173",]
+    "http://127.0.0.1:5173","http://10.251.10.209:5173"]
 CSRF_TRUSTED_ORIGINS = ["http://localhost:5173",
-    "http://127.0.0.1:5173",]
+    "http://127.0.0.1:5173","http://10.251.10.209:5173"]
 CORS_ALLOW_CREDENTIALS = True
 
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to access CSRF token
 CSRF_COOKIE_SAMESITE = 'Lax'  # or 'None' if using HTTPS
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5173","http://10.251.10.209:5173"
 ]
 
 # Session settings (important for csrf)
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
-
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -195,9 +216,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 
+
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_POST = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "aziz9259658@gmail.com"
 EMAIL_HOST_PASSWORD = "enter your password"
+
