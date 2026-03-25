@@ -11,6 +11,8 @@ import History from "./pages/History/History";
 import WriteExcuse from "./pages/WriteExcuse/WriteExcuse";
 import Feedback from "./pages/Feedback/Feedback";
 import GoogleCallback from "./pages/LoginAndRegister/GoogleCallback";
+import FeedbackList from "./pages/Feedback/FeedbackList/FeedbackList";
+import EmailHistory from "./pages/EmailHistory/EmailHistory";
 import axios from "./utils/axiosConfig";
 
 function App() {
@@ -32,17 +34,57 @@ function App() {
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("access_token");
+      const refreshToken = localStorage.getItem("refresh_token");
+
+      if (!token && !refreshToken) {
+        // No tokens at all — user never logged in
+        setIsLoading(false);
+        return;
+      }
 
       if (token) {
         try {
+          // Try to verify the access token first
           await axios.post("/auth/jwt/verify/", { token });
           const response = await axios.get("/auth/user/");
           setUser(response.data);
           localStorage.setItem("user", JSON.stringify(response.data));
+          setIsLoading(false);
+          return;
         } catch (error) {
-          handleLogout();
+          // Access token expired or invalid — try to refresh
+          console.log("Access token expired, trying refresh...");
         }
       }
+
+      // Access token failed — try refresh token
+      if (refreshToken) {
+        try {
+          const refreshResponse = await axios.post("/auth/jwt/refresh/", {
+            refresh: refreshToken,
+          });
+
+          const newAccessToken = refreshResponse.data.access;
+
+          // Save new access token
+          localStorage.setItem("access_token", newAccessToken);
+          axios.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${newAccessToken}`;
+
+          // Get user data with new token
+          const userResponse = await axios.get("/auth/user/");
+          setUser(userResponse.data);
+          localStorage.setItem("user", JSON.stringify(userResponse.data));
+        } catch (error) {
+          // Refresh token also expired — now we actually log out
+          console.log("Refresh token expired, logging out...");
+          handleLogout();
+        }
+      } else {
+        handleLogout();
+      }
+
       setIsLoading(false);
     };
 
@@ -77,6 +119,10 @@ function App() {
           element={<GoogleCallback setAuthData={setAuthData} />}
         />
         <Route
+          path="/email-history"
+          element={user ? <EmailHistory /> : <Navigate to="/login" />}
+        />
+        <Route
           path="/profile"
           element={
             user ? (
@@ -96,7 +142,12 @@ function App() {
             user ? <WriteExcuse user={user} /> : <Navigate to="/login" />
           }
         />
-        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/feedback-list" element={<FeedbackList />} />
+        <Route
+          path="/feedback"
+          element={<Feedback user={user} />}
+          // element={<Feedback />}
+        />
         <Route path="/" element={<Navigate to="/login" />} />
       </Routes>
     </Router>

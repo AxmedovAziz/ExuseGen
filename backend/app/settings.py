@@ -70,9 +70,11 @@ SOCIALACCOUNT_PROVIDERS = {
         'SCOPE': [
             'profile',
             'email',
+            'https://www.googleapis.com/auth/gmail.send',  # ADD THIS
         ],
         'AUTH_PARAMS': {
-            'access_type': 'online',
+            'access_type': 'offline',   # CHANGE from 'online' to 'offline' (gets refresh token)
+            'prompt': 'consent',        # ADD THIS - forces Google to always give refresh token
         }
     }
 }
@@ -203,7 +205,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/New_York'
+USE_TZ = True
 
 USE_I18N = True
 
@@ -217,10 +221,14 @@ STATIC_URL = 'static/'
 
 
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_POST = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "aziz9259658@gmail.com"
-EMAIL_HOST_PASSWORD = "enter your password"
+# EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# EMAIL_HOST = "smtp.gmail.com"
+# EMAIL_POST = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = "aziz9259657@gmail.com"
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+# EMAIL_HOST_PASSWORD = "admin123!"
+
+# DEFAULT_FROM_EMAIL = "aziz9259657@gmail.com"
 

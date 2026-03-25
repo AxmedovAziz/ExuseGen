@@ -18,8 +18,12 @@ urlpatterns = [
     # Google OAuth - Use the new simple view
     path('google/start/', views.google_auth_start, name='google_auth_start'),
     path('google/callback/', views.SimpleGoogleLogin.as_view(), name='google_callback'),
+    path('send-email/', views.SendGmailView.as_view(), name='send_email'),
+    
+    path('email-history/', views.EmailHistoryView.as_view(), name='email_history'),
     
     # User endpoints
     path('user/', views.current_user, name='current_user'),
     path('csrf/', views.get_csrf_token, name='get_csrf_token'),
+    # path('api/send-email/', views.send_email_via_gmail, name='send_email'),
 ]

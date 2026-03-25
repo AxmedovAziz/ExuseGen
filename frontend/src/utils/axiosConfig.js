@@ -1,21 +1,19 @@
 import axios from "axios";
 
-// Configure axios defaults
 axios.defaults.baseURL = "http://localhost:8000";
 axios.defaults.withCredentials = true;
 axios.defaults.xsrfCookieName = "csrftoken";
 axios.defaults.xsrfHeaderName = "X-CSRFToken";
 
-// Add token to requests if it exists
-const token = localStorage.getItem("access_token");
-if (token) {
-  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-}
-
-// Add request interceptor to ensure CSRF token is sent
 axios.interceptors.request.use(
   (config) => {
-    // For POST requests, ensure we have CSRF token
+    // ← reads token fresh on EVERY request, not just at import time
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    // CSRF for POST requests
     if (config.method === "post") {
       const csrfToken = document.cookie
         .split("; ")
@@ -26,9 +24,43 @@ axios.interceptors.request.use(
         config.headers["X-CSRFToken"] = csrfToken;
       }
     }
+
     return config;
   },
-  (error) => {
+  (error) => Promise.reject(error)
+);
+axios.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // If 401 and we haven't already retried
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      const refreshToken = localStorage.getItem("refresh_token");
+      if (refreshToken) {
+        try {
+          const response = await axios.post("/auth/jwt/refresh/", {
+            refresh: refreshToken,
+          });
+
+          const newToken = response.data.access;
+          localStorage.setItem("access_token", newToken);
+          axios.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+          originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+
+          return axios(originalRequest); // retry the original request
+        } catch (refreshError) {
+          // Refresh failed — clear everything
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
+        }
+      }
+    }
+
     return Promise.reject(error);
   }
 );

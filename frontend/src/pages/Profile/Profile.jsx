@@ -84,16 +84,31 @@ const Profile = ({ user, handleLogout }) => {
                 <span className="action-icon">❓</span>
                 Help Center
               </button> */}
-              <Link to={"/feedback"} className="action-btn help-btn">
+              <Link
+                state={{ user: user }}
+                to={"/feedback"}
+                className="action-btn help-btn"
+              >
                 <span className="action-icon">💬</span>
                 Feedback
               </Link>
 
               {/* New History and Write Excuse buttons */}
-              <Link to="/history" className="action-btn history-btn">
+              <Link to="/email-history" className="action-btn history-btn">
                 <span className="action-icon">📜</span>
                 View History
               </Link>
+              {/* {sendSuccess && (
+                <div className="success-message">
+                  ✅ Sent to {emailTo}!{" "}
+                  <span
+                    style={{ cursor: "pointer", textDecoration: "underline" }}
+                    onClick={() => navigate("/email-history")}
+                  >
+                    View history →
+                  </span>
+                </div>
+              )} */}
               <Link to="/write-excuse" className="action-btn write-excuse-btn">
                 <span className="action-icon">📝</span>
                 Write Excuse

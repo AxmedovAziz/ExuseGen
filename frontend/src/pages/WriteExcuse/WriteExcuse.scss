@@ -904,3 +904,662 @@
     box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
   }
 }
+// Add these to your WriteExcuse.scss file
+
+// Category buttons for exactly 3 options
+.category-buttons-three {
+  grid-template-columns: repeat(3, 1fr) !important;
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 5px;
+  }
+}
+
+// Professional Date Input
+.date-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.form-date-input {
+  width: 100%;
+  padding: 15px 20px;
+  padding-right: 45px;
+  border: 2px solid #e9ecef;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  transition: all 0.3s ease;
+  color: #212529;
+
+  &::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    padding: 12px 15px;
+    padding-right: 40px;
+    font-size: 0.95rem;
+  }
+}
+
+.date-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  color: #6c757d;
+  pointer-events: none;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    right: 12px;
+  }
+}
+
+// Excuses List
+.excuses-section {
+  margin: 30px 0;
+  animation: slideUp 0.5s ease;
+}
+
+.excuses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 5px;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
+    border-radius: 10px;
+  }
+}
+
+.excuse-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid #e9ecef;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  width: 100%;
+
+  &:hover {
+    transform: translateX(5px);
+    border-color: #4361ee;
+    box-shadow: 0 5px 20px rgba(67, 97, 238, 0.15);
+  }
+
+  &.selected {
+    border-color: #4caf50;
+    background: linear-gradient(135deg, #f0fff4 0%, #dcffe4 100%);
+    box-shadow: 0 5px 20px rgba(76, 175, 80, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    padding: 15px;
+    gap: 12px;
+  }
+}
+
+.excuse-number {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+
+  @media (max-width: 768px) {
+    width: 25px;
+    height: 25px;
+    min-width: 25px;
+    font-size: 0.8rem;
+  }
+}
+
+.excuse-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #212529;
+  flex: 1;
+
+  @media (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+}
+
+// Selected Excuse Editor
+.selected-excuse-section {
+  margin: 30px 0;
+  animation: fadeIn 0.5s ease;
+}
+
+.excuse-editor {
+  background: white !important;
+  border: 2px solid #4361ee !important;
+  box-shadow: 0 5px 20px rgba(67, 97, 238, 0.1);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+// Send Button (Future Implementation)
+.send-button-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.send-btn {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 16px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 10px 20px rgba(76, 175, 80, 0.3);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(76, 175, 80, 0.4);
+  }
+
+  @media (max-width: 768px) {
+    padding: 14px 30px;
+    font-size: 1rem;
+    width: 100%;
+  }
+}
+
+.send-note {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-top: 10px;
+  font-style: italic;
+}
+
+// Loading Section
+.loading-section {
+  margin: 30px 0;
+  text-align: center;
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 16px;
+  gap: 20px;
+
+  p {
+    color: #4361ee;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+  }
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(67, 97, 238, 0.1);
+  border-top: 4px solid #4361ee;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+// Update form actions
+.form-actions {
+  margin: 30px 0;
+}
+
+.generate-btn {
+  width: 100%;
+  padding: 18px;
+  font-size: 1.2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+  }
+}
+
+// Animations
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// Add these styles to your existing WriteExcuse.scss file
+
+.form-input {
+  width: 100%;
+  padding: 15px 20px;
+  border: 2px solid #e9ecef;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  transition: all 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+  }
+
+  @media (max-width: 768px) {
+    padding: 12px 15px;
+    font-size: 0.95rem;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-group {
+    flex: 1;
+    margin-bottom: 0;
+
+    @media (max-width: 768px) {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.required-star {
+  color: #ff4b2b;
+  margin-left: 4px;
+  font-size: 1.2rem;
+}
+
+.tone-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+
+  @media (max-width: 480px) {
+    gap: 8px;
+  }
+}
+
+.tone-btn {
+  padding: 10px 20px;
+  border: 2px solid #e9ecef;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  color: #6c757d;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+  min-width: 100px;
+
+  @media (max-width: 480px) {
+    padding: 8px 15px;
+    font-size: 0.85rem;
+    min-width: 80px;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: #4361ee;
+    color: #4361ee;
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+  }
+
+  &.active {
+    background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+
+    &:hover {
+      color: white;
+    }
+  }
+}
+
+.error-message {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  animation: shake 0.5s ease;
+  box-shadow: 0 5px 20px rgba(255, 75, 43, 0.3);
+}
+
+.loading-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  gap: 15px;
+
+  p {
+    color: #6c757d;
+    font-size: 1rem;
+    margin: 0;
+  }
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e9ecef;
+  border-top: 4px solid #4361ee;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+// Update existing styles
+.write-preview {
+  margin: 30px 0;
+  animation: fadeIn 0.5s ease;
+}
+
+.preview-box {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 16px;
+  padding: 25px;
+  border-left: 5px solid #4361ee;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.preview-text {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #212529;
+  line-height: 1.6;
+  margin: 0;
+  font-style: italic;
+  quotes: "“" "”" "‘" "’";
+
+  &::before {
+    content: "“";
+    color: #4361ee;
+    font-size: 1.5rem;
+    margin-right: 4px;
+  }
+
+  &::after {
+    content: "”";
+    color: #4361ee;
+    font-size: 1.5rem;
+    margin-left: 4px;
+  }
+}
+
+// Update generate button
+.generate-btn {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+  width: 100%;
+  padding: 18px 30px;
+  font-size: 1.2rem;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(79, 172, 254, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+// Remove save button styles since we're not using it
+.save-btn {
+  display: none;
+}
+
+.form-actions {
+  margin-bottom: 0;
+}
+
+// Email Section Styles
+.email-section {
+  margin: 25px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e6edff 100%);
+  border-radius: 16px;
+  border-left: 5px solid #4361ee;
+  animation: slideUp 0.3s ease;
+
+  @media (max-width: 768px) {
+    padding: 15px;
+    margin: 20px 0;
+  }
+}
+
+.email-input-wrapper {
+  position: relative;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.form-email-input {
+  width: 100%;
+  padding: 16px 20px;
+  padding-right: 50px;
+  border: 2px solid #e9ecef;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: white;
+  transition: all 0.3s ease;
+  color: #212529;
+
+  &::placeholder {
+    color: #adb5bd;
+    font-style: italic;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+  }
+
+  &:hover {
+    border-color: #6c757d;
+  }
+
+  @media (max-width: 768px) {
+    padding: 14px 15px;
+    padding-right: 45px;
+    font-size: 0.95rem;
+  }
+}
+
+.email-icon {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.3rem;
+  color: #4361ee;
+  pointer-events: none;
+  opacity: 0.7;
+
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+    right: 15px;
+  }
+}
+
+.email-note {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50px;
+  flex-wrap: wrap;
+
+  @media (max-width: 480px) {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+  }
+}
+
+.future-badge {
+  background: linear-gradient(135deg, #ffd166 0%, #ffb347 100%);
+  color: #2d2d2d;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 50px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: auto;
+
+  @media (max-width: 480px) {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+  }
+}
+
+// Update send button container for better spacing
+.send-button-container {
+  text-align: center;
+  margin-top: 30px;
+
+  @media (max-width: 768px) {
+    margin-top: 25px;
+  }
+}
+
+// Add validation style for email (optional)
+.form-email-input:invalid:not(:placeholder-shown) {
+  border-color: #ff6b6b;
+  background: #fff8f8;
+}
+
+.form-email-input:valid:not(:placeholder-shown) {
+  border-color: #51cf66;
+  background: #f4fff4;
+}
