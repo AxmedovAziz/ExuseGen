@@ -1,5 +1,6 @@
 **/__pycache__/
-
+echo "backend/credentials.json" >> .gitignore
+echo "backend/db.sqlite3" >> .gitignore
 
 .env 
 backend/credentials.json
