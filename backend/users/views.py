@@ -337,3 +337,48 @@ class EmailHistoryView(APIView):
             for e in emails
         ]
         return Response({'history': data})
+    
+
+
+from .serializers import UserProfileSerializer
+from rest_framework import generics, permissions
+class MeView(generics.RetrieveAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.profile
+    
+    
+class MeView(generics.RetrieveAPIView):
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        profile, _ = UserProfile.objects.get_or_create(user=self.request.user)
+        return profile
+    
+    
+    
+    
+
+
+
+
+
+class LastSentEmailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        email = SentEmail.objects.filter(user=request.user).first()  # first() because ordered by -sent_at
+        if not email:
+            return Response({'last_email': None})
+        return Response({
+            'last_email': {
+                'id': email.id,
+                'to': email.to,
+                'subject': email.subject,
+                'body_preview': email.body_preview,
+                'sent_at': email.sent_at.strftime('%b %d, %Y %I:%M %p'),
+            }
+        })

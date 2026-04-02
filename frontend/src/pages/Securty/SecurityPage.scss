@@ -1,0 +1,844 @@
+// SecurityPage.scss
+// Matches app design system: Profile.scss + Feedback.scss aesthetic
+
+// ─── Variables ───────────────────────────────────────────────────────────────
+$sec-primary: #4361ee;
+$sec-secondary: #7209b7;
+$sec-accent: #4cc9f0;
+$sec-danger: #f72585;
+$sec-dark: #0d0d1a;
+$sec-card-bg: #ffffff;
+$sec-radius: 20px;
+$sec-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+
+// ─── Keyframes ───────────────────────────────────────────────────────────────
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-12px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-6px) rotate(-1deg);
+  }
+}
+
+@keyframes orbPulse {
+  0%,
+  100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.15) translate(-20px, -20px);
+    opacity: 0.7;
+  }
+}
+
+@keyframes orbPulse2 {
+  0%,
+  100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.2) translate(20px, 15px);
+    opacity: 0.6;
+  }
+}
+
+@keyframes gridScroll {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(40px);
+  }
+}
+
+@keyframes shieldGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba($sec-accent, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 24px rgba($sec-accent, 0.9));
+  }
+}
+
+@keyframes scanLine {
+  0% {
+    top: -2px;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes badgePop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes featureSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes statCount {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dotBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+
+// ─── Page Layout ─────────────────────────────────────────────────────────────
+.security-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
+}
+
+// ─── Animated Background ─────────────────────────────────────────────────────
+.security-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(
+    circle,
+    rgba($sec-primary, 0.25) 0%,
+    rgba($sec-secondary, 0.1) 60%,
+    transparent 100%
+  );
+  top: -200px;
+  right: -150px;
+  animation: orbPulse 8s ease-in-out infinite;
+
+  &.second {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(
+      circle,
+      rgba($sec-accent, 0.2) 0%,
+      rgba($sec-danger, 0.08) 60%,
+      transparent 100%
+    );
+    bottom: -150px;
+    left: -100px;
+    top: auto;
+    right: auto;
+    animation: orbPulse2 10s ease-in-out infinite;
+  }
+}
+
+.grid-overlay {
+  position: absolute;
+  inset: -40px;
+  background-image: linear-gradient(
+      rgba($sec-primary, 0.04) 1px,
+      transparent 1px
+    ),
+    linear-gradient(90deg, rgba($sec-primary, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridScroll 6s linear infinite;
+}
+
+// ─── Container ───────────────────────────────────────────────────────────────
+.security-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 760px;
+  padding: 20px 0;
+  animation: fadeIn 0.6s ease-out;
+}
+
+// ─── Back Button ─────────────────────────────────────────────────────────────
+.back-button {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: none;
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: $sec-primary;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 25px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.07);
+
+  .back-icon {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    transform: translateX(-5px);
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+    .back-icon {
+      transform: translateX(-3px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    margin-bottom: 18px;
+  }
+}
+
+// ─── Main Card ───────────────────────────────────────────────────────────────
+.security-card {
+  background: $sec-card-bg;
+  border-radius: 28px;
+  box-shadow: $sec-shadow;
+  overflow: hidden;
+  animation: slideUp 0.5s ease;
+
+  @media (max-width: 768px) {
+    border-radius: 20px;
+  }
+}
+
+// ─── Header ──────────────────────────────────────────────────────────────────
+.security-header {
+  text-align: center;
+  padding: 50px 40px 40px;
+  background: linear-gradient(135deg, $sec-primary 0%, $sec-secondary 100%);
+  color: white;
+  position: relative;
+  overflow: hidden;
+
+  // dot-grid texture like profile header
+  &::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.08) 1px,
+      transparent 1px
+    );
+    background-size: 28px 28px;
+    animation: float 20s linear infinite;
+  }
+
+  // scan line effect
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba($sec-accent, 0.8),
+      transparent
+    );
+    animation: scanLine 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @media (max-width: 768px) {
+    padding: 35px 25px 30px;
+  }
+}
+
+.shield-icon {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 20px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  animation: float 4s ease-in-out infinite, shieldGlow 3s ease-in-out infinite;
+  position: relative;
+
+  svg {
+    width: 44px;
+    height: 44px;
+    color: white;
+  }
+
+  // spinning ring
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px dashed rgba(255, 255, 255, 0.2);
+    animation: rotate 12s linear infinite;
+  }
+
+  @media (max-width: 768px) {
+    width: 72px;
+    height: 72px;
+    svg {
+      width: 36px;
+      height: 36px;
+    }
+  }
+}
+
+.security-title {
+  font-size: 2.6rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+  position: relative;
+
+  .glow-text {
+    background: linear-gradient(
+      135deg,
+      #a8edea 0%,
+      $sec-accent 50%,
+      #fed6e3 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 20px rgba($sec-accent, 0.4));
+  }
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+  @media (max-width: 480px) {
+    font-size: 1.6rem;
+  }
+}
+
+.security-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.88;
+  max-width: 440px;
+  margin: 0 auto;
+  line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
+}
+
+// ─── Badge ───────────────────────────────────────────────────────────────────
+.security-badge {
+  margin: -1px 0 0;
+  background: linear-gradient(
+    135deg,
+    rgba($sec-primary, 0.05) 0%,
+    rgba($sec-accent, 0.05) 100%
+  );
+  border-bottom: 1px solid rgba($sec-primary, 0.08);
+  padding: 18px 40px;
+  animation: badgePop 0.6s ease 0.3s both;
+
+  @media (max-width: 768px) {
+    padding: 14px 25px;
+  }
+}
+
+.badge-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge-icon {
+  font-size: 1.2rem;
+}
+
+.badge-text {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: $sec-primary;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+
+  @media (max-width: 480px) {
+    font-size: 0.75rem;
+    text-align: center;
+  }
+}
+
+// ─── Feature Cards ───────────────────────────────────────────────────────────
+.security-features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: rgba($sec-primary, 0.06);
+  padding: 30px 30px 25px;
+  row-gap: 16px;
+  column-gap: 16px;
+  background: transparent;
+
+  @media (max-width: 580px) {
+    grid-template-columns: 1fr;
+  }
+  @media (max-width: 768px) {
+    padding: 20px 20px 18px;
+  }
+}
+
+.feature-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border: 1px solid rgba($sec-primary, 0.07);
+  transition: all 0.3s ease;
+  animation: featureSlide 0.5s ease both;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, $sec-primary, $sec-secondary);
+    border-radius: 4px 0 0 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba($sec-primary, 0.12);
+    border-color: rgba($sec-primary, 0.2);
+    background: linear-gradient(135deg, #f0f2ff 0%, #e8ecff 100%);
+
+    &::before {
+      opacity: 1;
+    }
+    .feature-icon {
+      transform: scale(1.15) rotate(-5deg);
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+.feature-icon {
+  font-size: 2rem;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.feature-text {
+  h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 5px;
+    line-height: 1.3;
+  }
+
+  p {
+    font-size: 0.85rem;
+    color: #6c757d;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+// ─── Security Message ────────────────────────────────────────────────────────
+.security-message {
+  margin: 0 30px 25px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, $sec-dark 0%, #1a1a3e 100%);
+  color: white;
+  padding: 30px 35px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.7s ease 0.5s both;
+
+  // live activity dots
+  &::before {
+    content: "● ● ●";
+    position: absolute;
+    top: 14px;
+    left: 20px;
+    font-size: 8px;
+    letter-spacing: 5px;
+    color: rgba($sec-accent, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    margin: 0 20px 20px;
+    padding: 25px 20px;
+  }
+}
+
+.message-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba($sec-accent, 0.12) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  animation: glowPulse 3s ease-in-out infinite;
+}
+
+.message-content {
+  position: relative;
+  z-index: 1;
+  padding-top: 10px;
+
+  p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: rgba(255, 255, 255, 0.88);
+    margin: 0;
+
+    strong {
+      color: $sec-accent;
+      font-weight: 700;
+    }
+  }
+
+  @media (max-width: 768px) {
+    p {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.quote {
+  font-size: 4rem;
+  line-height: 0.5;
+  color: rgba($sec-accent, 0.3);
+  font-family: Georgia, serif;
+  display: inline-block;
+  margin-bottom: 8px;
+
+  &.end {
+    display: block;
+    text-align: right;
+    margin-top: 8px;
+    margin-bottom: 0;
+  }
+}
+
+.signature {
+  margin-top: 18px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 14px;
+
+  .dev-signature {
+    color: $sec-danger;
+    font-weight: 600;
+    font-style: normal;
+  }
+}
+
+// ─── Footer / Stats ──────────────────────────────────────────────────────────
+.security-footer {
+  padding: 25px 30px 35px;
+  background: linear-gradient(
+    135deg,
+    rgba($sec-primary, 0.03) 0%,
+    rgba($sec-secondary, 0.03) 100%
+  );
+  border-top: 1px solid rgba($sec-primary, 0.07);
+
+  @media (max-width: 768px) {
+    padding: 20px 20px 28px;
+  }
+}
+
+.security-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+.stat {
+  background: $sec-card-bg;
+  border-radius: 14px;
+  padding: 18px 16px;
+  text-align: center;
+  border: 1px solid rgba($sec-primary, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  animation: statCount 0.5s ease both;
+  transition: all 0.3s ease;
+
+  &:nth-child(1) {
+    animation-delay: 0.6s;
+  }
+  &:nth-child(2) {
+    animation-delay: 0.7s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.8s;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba($sec-primary, 0.1);
+    border-color: rgba($sec-primary, 0.25);
+  }
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, $sec-primary, $sec-secondary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 5px;
+
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// ─── CTA Button ──────────────────────────────────────────────────────────────
+.cta-button {
+  width: 100%;
+  padding: 18px 30px;
+  background: linear-gradient(135deg, $sec-primary 0%, $sec-secondary 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 10px 25px rgba($sec-primary, 0.35);
+  letter-spacing: 0.3px;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 18px 35px rgba($sec-primary, 0.45);
+    background: linear-gradient(
+      135deg,
+      darken($sec-primary, 5%) 0%,
+      darken($sec-secondary, 5%) 100%
+    );
+  }
+
+  &:active {
+    transform: translateY(-1px);
+  }
+
+  span {
+    font-size: 1.1rem;
+  }
+
+  @media (max-width: 768px) {
+    padding: 16px 25px;
+    font-size: 1rem;
+  }
+}
+
+// ─── Dark Mode ───────────────────────────────────────────────────────────────
+@media (prefers-color-scheme: dark) {
+  .security-page {
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+  }
+
+  .security-card {
+    background: #1a1a2e;
+  }
+
+  .security-badge {
+    background: linear-gradient(
+      135deg,
+      rgba($sec-primary, 0.1) 0%,
+      rgba($sec-accent, 0.05) 100%
+    );
+    border-bottom-color: rgba($sec-primary, 0.15);
+  }
+
+  .feature-card {
+    background: linear-gradient(135deg, #1e1e3a 0%, #16162e 100%);
+    border-color: rgba($sec-primary, 0.15);
+
+    &:hover {
+      background: linear-gradient(135deg, #252550 0%, #1c1c42 100%);
+    }
+
+    .feature-text {
+      h3 {
+        color: #e9ecef;
+      }
+      p {
+        color: #adb5bd;
+      }
+    }
+  }
+
+  .back-button {
+    background: linear-gradient(135deg, #1e1e3a 0%, #16162e 100%);
+    color: $sec-accent;
+    &:hover {
+      background: linear-gradient(135deg, #252550 0%, #1c1c42 100%);
+    }
+  }
+
+  .security-footer {
+    background: linear-gradient(
+      135deg,
+      rgba($sec-primary, 0.06) 0%,
+      rgba($sec-secondary, 0.06) 100%
+    );
+    border-top-color: rgba($sec-primary, 0.12);
+  }
+
+  .stat {
+    background: #1e1e3a;
+    border-color: rgba($sec-primary, 0.2);
+  }
+
+  .stat-label {
+    color: #adb5bd;
+  }
+}

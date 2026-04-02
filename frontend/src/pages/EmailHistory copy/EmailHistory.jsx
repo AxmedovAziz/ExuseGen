@@ -18,16 +18,6 @@ const EmailHistory = () => {
   const [toastMessage, setToastMessage] = useState("");
   const [sortOrder, setSortOrder] = useState("desc");
   const [viewMode, setViewMode] = useState("list");
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-
-  // Check for mobile view
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   const fetchHistory = useCallback(
     async (showRefresh = false) => {
@@ -227,25 +217,22 @@ const EmailHistory = () => {
             )}
           </div>
 
-          {/* Only show view toggle on desktop */}
-          {!isMobile && (
-            <div className="view-toggle">
-              <button
-                className={`view-btn ${viewMode === "list" ? "active" : ""}`}
-                onClick={() => setViewMode("list")}
-                title="List View"
-              >
-                ☰
-              </button>
-              <button
-                className={`view-btn ${viewMode === "grid" ? "active" : ""}`}
-                onClick={() => setViewMode("grid")}
-                title="Grid View"
-              >
-                ⊞
-              </button>
-            </div>
-          )}
+          <div className="view-toggle">
+            <button
+              className={`view-btn ${viewMode === "list" ? "active" : ""}`}
+              onClick={() => setViewMode("list")}
+              title="List View"
+            >
+              ☰
+            </button>
+            <button
+              className={`view-btn ${viewMode === "grid" ? "active" : ""}`}
+              onClick={() => setViewMode("grid")}
+              title="Grid View"
+            >
+              ⊞
+            </button>
+          </div>
         </div>
 
         {/* Sort Controls */}
@@ -312,17 +299,16 @@ const EmailHistory = () => {
           </div>
         )}
 
-        {/* Email List - Always list view on mobile */}
+        {/* Email List */}
         {!isLoading && filteredHistory.length > 0 && (
-          <div className={`emails-container ${!isMobile ? viewMode : "list"}`}>
+          <div className={`emails-container ${viewMode}`}>
             {filteredHistory.map((email) => (
               <div
                 key={email.id}
                 className="email-card"
                 onClick={() => handleEmailClick(email)}
               >
-                {/* Always show list view on mobile, grid/list on desktop */}
-                {isMobile || viewMode === "list" ? (
+                {viewMode === "list" ? (
                   // List View
                   <>
                     <div className="card-avatar">
@@ -359,7 +345,7 @@ const EmailHistory = () => {
                     </div>
                   </>
                 ) : (
-                  // Grid View (Desktop only)
+                  // Grid View
                   <div className="grid-content">
                     <div className="grid-recipient">
                       <div className="grid-avatar">{getInitials(email.to)}</div>

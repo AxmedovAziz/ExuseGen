@@ -12,6 +12,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.core.mail import send_mail, BadHeaderError
 from .serializers import EmailSerializer
+from users.permissions import IsAdminUserProfile,IsProfileAdmin
+from users.models import UserProfile, SentEmail
+
 @csrf_exempt
 def generate_excuse_view(request):
     if request.method == "POST":
@@ -67,7 +70,27 @@ def feedback_view(request):
         return JsonResponse({"error": str(e)}, status=500)
 #///////NOT BEING USED CURRENTLY//////
 
+from rest_framework.permissions import IsAuthenticated, SAFE_METHODS, BasePermission
+
+class IsAdminOrReadOnly(BasePermission):
+    """Allow anyone to read, but only admins can write."""
+    def has_permission(self, request, view):
+        # Allow GET, HEAD, OPTIONS for anyone
+        if request.method in SAFE_METHODS:
+            return True
+        if request.method == "POST":
+            return True
+        # For write operations, require admin
+        if request.user and request.user.is_authenticated:
+            if hasattr(request.user, 'profile'):
+                return request.user.profile.is_admin
+        return False
 
 class FeedbackViewSet(viewsets.ModelViewSet):
+    
     queryset = Feedback.objects.all().order_by('-created_at')
     serializer_class = FeedbackSerializer
+    permission_classes = [IsAdminOrReadOnly]
+    # permission_classes = [ IsProfileAdmin]
+    # permission_classes = [ IsAdminUserProfile]
+    

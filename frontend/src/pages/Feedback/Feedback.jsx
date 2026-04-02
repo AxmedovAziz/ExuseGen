@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Feedback.scss";
-
+import useAdminCheck from "../../hooks/useAdminCheck";
 const Feedback = ({ user }) => {
   // Add user prop here
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ const Feedback = ({ user }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const { isAdmin } = useAdminCheck();
 
   const feedbackTypes = [
     {
@@ -157,7 +158,10 @@ const Feedback = ({ user }) => {
         <div className="feedback-header">
           <div className="feedback-icon">💬</div>
           <h1 className="feedback-title">Share Your Feedback</h1>
-          <p className="feedback-subtitle">Help us improve your experience</p>
+          <p className="feedback-subtitle">
+            Yoo buddy nothing stupid tho, keep it serious
+          </p>
+          {/* <p className="feedback-subtitle">Help us improve your experience</p> */}
         </div>
 
         <form className="feedback-form" onSubmit={handleSubmit}>
@@ -165,7 +169,8 @@ const Feedback = ({ user }) => {
           <div className="form-section">
             <label className="form-label">
               <span className="label-icon">📋</span>
-              What would you like to share?
+              What kinda feedback you wanna give?
+              {/* What would you like to share? */}
             </label>
             <div className="feedback-type-grid">
               {feedbackTypes.map((type) => (
@@ -270,17 +275,19 @@ const Feedback = ({ user }) => {
               {isLoading ? "Submitting..." : "Submit Feedback"}
             </button>
           </div>
-          <div className="view-feedback-link">
-            <button
-              type="button"
-              className="view-feedback-btn"
-              onClick={() => navigate("/feedback-list")}
-            >
-              <span className="btn-icon">👀</span>
-              View All Feedback
-            </button>
-            <p className="view-feedback-note">See what others are saying</p>
-          </div>
+          {isAdmin && (
+            <div className="view-feedback-link">
+              <button
+                type="button"
+                className="view-feedback-btn"
+                onClick={() => navigate("/feedback-list")}
+              >
+                <span className="btn-icon">👀</span>
+                View All Feedback
+              </button>
+              <p className="view-feedback-note">See what others are saying</p>
+            </div>
+          )}
         </form>
 
         <div className="feedback-footer">

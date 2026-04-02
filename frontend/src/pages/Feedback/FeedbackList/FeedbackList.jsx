@@ -1,22 +1,33 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./FeedbackList.scss";
+import useAdminCheck from "../../../hooks/useAdminCheck";
 
 const FeedbackList = () => {
   const navigate = useNavigate();
   const [feedbacks, setFeedbacks] = useState([]);
+  const [displayedFeedbacks, setDisplayedFeedbacks] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
-  const [deletingId, setDeletingId] = useState(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
-  const [deleteSuccess, setDeleteSuccess] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortConfig, setSortConfig] = useState({
+    key: "date",
+    direction: "desc",
+  });
+  const [selectedRows, setSelectedRows] = useState([]);
 
-  const ITEMS_PER_PAGE = 5;
+  const { isAdmin, authLoading } = useAdminCheck({ redirectIfNotAdmin: true });
+
+  const [deletingId, setDeletingId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const ITEMS_PER_PAGE = 10;
 
   const categories = [
     { id: "all", label: "All", icon: "📋", color: "#4361ee", apiValue: "all" },
@@ -52,26 +63,18 @@ const FeedbackList = () => {
   ];
 
   const formatDate = (dateString) => {
-    if (!dateString) return "Date not available";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    if (!dateString) return "N/A";
+    const options = { year: "numeric", month: "short", day: "numeric" };
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   const getCategoryInfo = (categoryName) => {
     if (!categoryName) return { icon: "📝", color: "#6c757d", label: "Other" };
-
     const category = categories.find(
       (c) =>
         c.apiValue.toLowerCase() === categoryName.toLowerCase() ||
         c.label.toLowerCase() === categoryName.toLowerCase()
     );
-
     return {
       icon: category?.icon || "📝",
       color: category?.color || "#6c757d",
@@ -79,211 +82,277 @@ const FeedbackList = () => {
     };
   };
 
-  // Function to build URL with proper parameters
-  const buildUrl = (page, category) => {
-    const baseUrl = "http://127.0.0.1:8000/api/excuses/feedback/";
-    const params = new URLSearchParams();
-
-    params.append("page", page);
-    params.append("page_size", ITEMS_PER_PAGE);
-
-    if (category !== "all") {
-      params.append("feedbacktype", category);
-      params.append("category", category);
-      params.append("type", category);
-    }
-
-    return `${baseUrl}?${params.toString()}`;
-  };
-
-  const fetchFeedbacks = async (
-    page = 1,
-    category = "all",
-    isLoadMore = false
-  ) => {
-    if (isLoadMore) {
-      setIsLoadingMore(true);
-    } else {
-      setIsLoading(true);
-      setFeedbacks([]);
-      setError("");
-      setHasMore(true);
-    }
-
-    try {
-      const url = buildUrl(page, category);
-      console.log("Fetching:", url);
-
-      const response = await fetch(url);
-
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("API Response:", data);
-
-      let newFeedbacks = [];
-      let total = 0;
-      let nextPageUrl = null;
-
-      if (data.results) {
-        newFeedbacks = data.results;
-        total = data.count || 0;
-        nextPageUrl = data.next;
-      } else if (Array.isArray(data)) {
-        newFeedbacks = data;
-        total = data.length;
-        nextPageUrl = null;
-      } else if (data.data && Array.isArray(data.data)) {
-        newFeedbacks = data.data;
-        total = data.total || data.data.length;
-        nextPageUrl = data.next_page;
-      } else {
-        newFeedbacks = Array.isArray(data) ? data : [];
-        total = newFeedbacks.length;
-      }
-
-      if (category !== "all" && newFeedbacks.length > 0) {
-        const filteredFeedbacks = newFeedbacks.filter((feedback) => {
-          const feedbackCategory = (
-            feedback.feedbacktype ||
-            feedback.category ||
-            feedback.type ||
-            ""
-          ).toLowerCase();
-          return feedbackCategory === category.toLowerCase();
-        });
-
-        if (filteredFeedbacks.length > 0) {
-          newFeedbacks = filteredFeedbacks;
-          total = filteredFeedbacks.length;
-        }
-      }
-
-      if (isLoadMore) {
-        setFeedbacks((prev) => [...prev, ...newFeedbacks]);
-      } else {
-        setFeedbacks(newFeedbacks);
-      }
-
-      let hasMoreItems = false;
-
-      if (nextPageUrl) {
-        hasMoreItems = true;
-      } else if (newFeedbacks.length === ITEMS_PER_PAGE) {
-        hasMoreItems = true;
-      } else {
-        hasMoreItems = false;
-      }
-
-      setHasMore(hasMoreItems);
-      setTotalCount(total);
-      setCurrentPage(page);
-
-      console.log(
-        `Page ${page}: Loaded ${newFeedbacks.length} items, hasMore: ${hasMoreItems}`
-      );
-    } catch (err) {
-      setError(`Failed to load feedback: ${err.message}`);
-      console.error("API Error:", err);
-    } finally {
-      if (isLoadMore) {
-        setIsLoadingMore(false);
-      } else {
-        setIsLoading(false);
-      }
-    }
+  const getFeedbackText = (feedback) => {
+    return (
+      feedback.feedbacktext ||
+      feedback.message ||
+      feedback.text ||
+      "No message provided"
+    );
   };
 
   useEffect(() => {
-    fetchFeedbacks(1, selectedCategory, false);
-  }, []);
+    if (isAdmin) {
+      fetchFeedbacks(1, "all");
+    }
+  }, [isAdmin]);
 
-  const handleCategoryFilter = (categoryId) => {
-    console.log("Filtering by:", categoryId);
-    setSelectedCategory(categoryId);
-    setCurrentPage(1);
+  const fetchFeedbacks = async (page = 1, category = "all") => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setError("No authentication token found. Please log in.");
+      return;
+    }
 
-    const selectedCat = categories.find((c) => c.id === categoryId);
-    const apiCategory = selectedCat?.apiValue || "all";
-
-    fetchFeedbacks(1, apiCategory, false);
-  };
-
-  const handleShowMore = () => {
-    if (!hasMore || isLoadingMore) return;
-
-    const nextPage = currentPage + 1;
-    const selectedCat = categories.find((c) => c.id === selectedCategory);
-    const apiCategory = selectedCat?.apiValue || "all";
-
-    fetchFeedbacks(nextPage, apiCategory, true);
-  };
-
-  const handleDeleteClick = (feedbackId, e) => {
-    e.stopPropagation();
-    setShowDeleteConfirm(feedbackId);
-  };
-
-  const handleCancelDelete = (e) => {
-    e.stopPropagation();
-    setShowDeleteConfirm(null);
-  };
-
-  const handleConfirmDelete = async (feedbackId, e) => {
-    e.stopPropagation();
-    setDeletingId(feedbackId);
-    setShowDeleteConfirm(null);
+    setIsLoading(true);
+    setError("");
 
     try {
-      const url = `http://127.0.0.1:8000/api/excuses/feedback/${feedbackId}/`;
-      console.log("Deleting:", url);
+      let url = `http://127.0.0.1:8000/api/excuses/feedback/?page=${page}&page_size=${ITEMS_PER_PAGE}`;
+      if (category !== "all") {
+        url += `&feedbacktype=${category}`;
+      }
 
       const response = await fetch(url, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("Delete Status Code:", response.status);
-
-      if (
-        response.status === 204 ||
-        response.status === 200 ||
-        response.status === 404
-      ) {
-        // Remove the deleted feedback from state
-        setFeedbacks((prevFeedbacks) =>
-          prevFeedbacks.filter((f) => (f.id || f._id) !== feedbackId)
-        );
-
-        // Show success message
-        setDeleteSuccess(feedbackId);
-
-        // Update total count
-        setTotalCount((prev) => Math.max(0, prev - 1));
-
-        // Hide success message after 2 seconds
-        setTimeout(() => {
-          setDeleteSuccess(null);
-        }, 2000);
-      } else {
-        throw new Error(`Delete failed with status: ${response.status}`);
+      if (response.status === 401) {
+        localStorage.removeItem("access_token");
+        navigate("/login");
+        return;
       }
+
+      if (!response.ok) throw new Error(`API error: ${response.status}`);
+
+      const data = await response.json();
+
+      let newFeedbacks = [];
+      let total = 0;
+
+      if (data.results) {
+        newFeedbacks = data.results;
+        total = data.count || data.results.length;
+      } else if (Array.isArray(data)) {
+        newFeedbacks = data;
+        total = data.length;
+      } else {
+        newFeedbacks = data.data || [];
+        total = data.total || newFeedbacks.length;
+      }
+
+      if (page === 1) {
+        setFeedbacks(newFeedbacks);
+        setDisplayedFeedbacks(newFeedbacks);
+      } else {
+        setFeedbacks((prev) => [...prev, ...newFeedbacks]);
+        setDisplayedFeedbacks((prev) => [...prev, ...newFeedbacks]);
+      }
+
+      setHasMore(newFeedbacks.length === ITEMS_PER_PAGE);
+      setTotalCount(total);
+    } catch (err) {
+      setError(`Failed to load feedback: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Filter and sort feedbacks
+  useEffect(() => {
+    let result = [...feedbacks];
+
+    // Category filter
+    if (selectedCategory !== "all") {
+      const selectedCat = categories.find((c) => c.id === selectedCategory);
+      result = result.filter((f) => {
+        const category = f.feedbacktype || f.category || "";
+        return category.toLowerCase() === selectedCat?.apiValue.toLowerCase();
+      });
+    }
+
+    // Search filter
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(
+        (f) =>
+          getFeedbackText(f).toLowerCase().includes(term) ||
+          (f.email && f.email.toLowerCase().includes(term))
+      );
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortConfig.key) {
+        case "message":
+          aValue = getFeedbackText(a);
+          bValue = getFeedbackText(b);
+          break;
+        case "category":
+          aValue = (a.feedbacktype || a.category || "").toLowerCase();
+          bValue = (b.feedbacktype || b.category || "").toLowerCase();
+          break;
+        case "rating":
+          aValue = a.rating || 0;
+          bValue = b.rating || 0;
+          break;
+        case "email":
+          aValue = (a.email || "").toLowerCase();
+          bValue = (b.email || "").toLowerCase();
+          break;
+        case "date":
+          aValue = new Date(a.created_at || 0);
+          bValue = new Date(b.created_at || 0);
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+
+    setDisplayedFeedbacks(result);
+  }, [feedbacks, selectedCategory, searchTerm, sortConfig]);
+
+  const handleSort = (key) => {
+    setSortConfig((prev) => ({
+      key,
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  const handleDelete = async (id) => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setError("No authentication token found. Please log in.");
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/excuses/feedback/${id}/`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.status === 401) {
+        localStorage.removeItem("access_token");
+        navigate("/login");
+        return;
+      }
+
+      if (!response.ok) throw new Error(`Delete failed: ${response.status}`);
+
+      const updatedFeedbacks = feedbacks.filter((f) => f.id !== id);
+      setFeedbacks(updatedFeedbacks);
+      setTotalCount((prev) => prev - 1);
+      setSelectedRows((prev) => prev.filter((rowId) => rowId !== id));
+
+      setSuccessMessage("Feedback deleted successfully!");
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
     } catch (err) {
       setError(`Failed to delete feedback: ${err.message}`);
-      console.error("Delete Error:", err);
-
-      // Hide error after 3 seconds
-      setTimeout(() => {
-        setError("");
-      }, 3000);
     } finally {
+      setIsDeleting(false);
       setDeletingId(null);
     }
   };
+
+  const handleBulkDelete = async () => {
+    if (selectedRows.length === 0) return;
+
+    const confirmed = window.confirm(
+      `Delete ${selectedRows.length} feedback items?`
+    );
+    if (!confirmed) return;
+
+    for (const id of selectedRows) {
+      await handleDelete(id);
+    }
+    setSelectedRows([]);
+  };
+
+  const handleSelectAll = () => {
+    if (selectedRows.length === displayedFeedbacks.length) {
+      setSelectedRows([]);
+    } else {
+      setSelectedRows(displayedFeedbacks.map((f) => f.id).filter((id) => id));
+    }
+  };
+
+  const handleSelectRow = (id) => {
+    setSelectedRows((prev) =>
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+    );
+  };
+
+  const handleCategoryFilter = (categoryId) => {
+    setSelectedCategory(categoryId);
+    setCurrentPage(1);
+    setFeedbacks([]);
+    setDisplayedFeedbacks([]);
+    setSelectedRows([]);
+    setSearchTerm("");
+
+    const selectedCat = categories.find((c) => c.id === categoryId);
+    const apiCategory = selectedCat?.apiValue || "all";
+    fetchFeedbacks(1, apiCategory);
+  };
+
+  const handleShowMore = () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    const selectedCat = categories.find((c) => c.id === selectedCategory);
+    const apiCategory = selectedCat?.apiValue || "all";
+    fetchFeedbacks(nextPage, apiCategory);
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    handleCategoryFilter("all");
+  };
+
+  const SortIcon = ({ column }) => {
+    if (sortConfig.key !== column) return <span className="sort-icon">↕️</span>;
+    return (
+      <span className="sort-icon">
+        {sortConfig.direction === "asc" ? "↑" : "↓"}
+      </span>
+    );
+  };
+
+  if (authLoading) {
+    return (
+      <div className="auth-loading">
+        <div className="spinner"></div>
+        <p>Verifying access...</p>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="forbidden-page">
+        <div className="forbidden-card">
+          <div className="forbidden-icon">🚫</div>
+          <h1>403 - Access Denied</h1>
+          <p>You don't have permission to view this page.</p>
+          <button onClick={() => navigate("/")} className="back-home-btn">
+            Return Home
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="feedback-list-container">
@@ -293,35 +362,30 @@ const FeedbackList = () => {
           <button className="back-button" onClick={() => navigate(-1)}>
             <span className="back-icon">←</span> Back
           </button>
-
-          <div className="header-content">
-            <div className="header-icon">📊</div>
-            <div className="header-text">
-              <h1>User Feedback</h1>
-              <p className="header-subtitle">
-                {totalCount > 0 ? (
-                  <>
-                    {totalCount} feedback {totalCount === 1 ? "item" : "items"}{" "}
-                    • Showing {feedbacks.length}
-                  </>
-                ) : !isLoading ? (
-                  "No feedback yet"
-                ) : (
-                  "Loading..."
-                )}
-              </p>
-            </div>
+          <div className="header-title">
+            <span className="header-icon">📊</span>
+            <h1>User Feedback</h1>
           </div>
+          <p className="header-subtitle">
+            {totalCount} feedback {totalCount === 1 ? "item" : "items"} received
+          </p>
         </div>
 
-        {/* Category Filters */}
-        <div className="filters-section">
-          <div className="filters-label">Filter by:</div>
-          <div className="filters-scroll">
+        {/* Success Message */}
+        {showSuccess && (
+          <div className="success-message">
+            <span className="success-icon">✅</span>
+            {successMessage}
+          </div>
+        )}
+
+        {/* Filters Bar */}
+        <div className="filters-bar">
+          <div className="category-filters">
             {categories.map((category) => (
               <button
                 key={category.id}
-                className={`filter-btn ${
+                className={`filter-chip ${
                   selectedCategory === category.id ? "active" : ""
                 }`}
                 onClick={() => handleCategoryFilter(category.id)}
@@ -330,9 +394,6 @@ const FeedbackList = () => {
                     selectedCategory === category.id
                       ? category.color
                       : "transparent",
-                  borderColor: category.color,
-                  color:
-                    selectedCategory === category.id ? "white" : category.color,
                 }}
               >
                 <span className="filter-icon">{category.icon}</span>
@@ -340,32 +401,36 @@ const FeedbackList = () => {
               </button>
             ))}
           </div>
+
+          <div className="search-bar">
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Search by message or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            {searchTerm && (
+              <button
+                className="clear-search"
+                onClick={() => setSearchTerm("")}
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Active Filter Indicator */}
-        {selectedCategory !== "all" && (
-          <div className="active-filter-indicator">
-            <span className="indicator-icon">🔍</span>
-            <span>
-              Showing only:{" "}
-              <strong>
-                {categories.find((c) => c.id === selectedCategory)?.label}
-              </strong>
+        {/* Bulk Actions Bar */}
+        {selectedRows.length > 0 && (
+          <div className="bulk-actions-bar">
+            <span className="selected-count">
+              {selectedRows.length} items selected
             </span>
-            <button
-              className="clear-filter-btn"
-              onClick={() => handleCategoryFilter("all")}
-            >
-              Clear Filter ✕
+            <button className="bulk-delete-btn" onClick={handleBulkDelete}>
+              🗑️ Delete Selected
             </button>
-          </div>
-        )}
-
-        {/* Success Message */}
-        {deleteSuccess && (
-          <div className="success-message">
-            <span className="success-icon">✅</span>
-            Feedback deleted successfully!
           </div>
         )}
 
@@ -377,213 +442,190 @@ const FeedbackList = () => {
           </div>
         )}
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Loading feedback...</p>
+        {/* Table View */}
+        {displayedFeedbacks.length === 0 && !isLoading ? (
+          <div className="empty-state">
+            <div className="empty-icon">📭</div>
+            <h3>No feedback found</h3>
+            <p>
+              {searchTerm || selectedCategory !== "all"
+                ? "Try adjusting your filters or search term"
+                : "Be the first to share your thoughts!"}
+            </p>
+            {(searchTerm || selectedCategory !== "all") && (
+              <button className="clear-all-filters" onClick={clearAllFilters}>
+                Clear All Filters
+              </button>
+            )}
           </div>
-        )}
-
-        {/* Feedback List */}
-        {!isLoading && (
-          <div className="feedback-items">
-            {feedbacks.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">📭</div>
-                <h3>No feedback yet</h3>
-                <p>
-                  {selectedCategory === "all"
-                    ? "Be the first to share your thoughts!"
-                    : `No ${
-                        categories.find((c) => c.id === selectedCategory)?.label
-                      } feedback available`}
-                </p>
-                {selectedCategory !== "all" && (
-                  <button
-                    className="view-all-btn"
-                    onClick={() => handleCategoryFilter("all")}
-                  >
-                    View All Feedback
-                  </button>
-                )}
-              </div>
-            ) : (
-              <>
-                {feedbacks.map((feedback, index) => {
-                  const categoryName =
-                    feedback.feedbacktype ||
-                    feedback.category ||
-                    feedback.type ||
-                    "Other";
-                  const categoryInfo = getCategoryInfo(categoryName);
-                  const feedbackId = feedback.id || feedback._id;
-                  const isDeleting = deletingId === feedbackId;
-                  const showConfirm = showDeleteConfirm === feedbackId;
-                  const isSuccess = deleteSuccess === feedbackId;
-
-                  return (
-                    <div
-                      key={feedbackId || index}
-                      className={`feedback-item ${
-                        isDeleting ? "deleting" : ""
-                      } ${isSuccess ? "delete-success" : ""}`}
+        ) : (
+          <>
+            <div className="table-wrapper">
+              <table className="feedback-table">
+                <thead>
+                  <tr>
+                    <th className="checkbox-cell">
+                      <input
+                        type="checkbox"
+                        checked={
+                          selectedRows.length === displayedFeedbacks.length &&
+                          displayedFeedbacks.length > 0
+                        }
+                        onChange={handleSelectAll}
+                      />
+                    </th>
+                    <th
+                      className="sortable"
+                      onClick={() => handleSort("message")}
                     >
-                      <div className="feedback-header">
-                        <div className="feedback-category-wrapper">
-                          <div
-                            className="feedback-category"
-                            style={{ backgroundColor: categoryInfo.color }}
+                      Message <SortIcon column="message" />
+                    </th>
+                    <th
+                      className="sortable"
+                      onClick={() => handleSort("category")}
+                    >
+                      Category <SortIcon column="category" />
+                    </th>
+                    <th
+                      className="sortable"
+                      onClick={() => handleSort("rating")}
+                    >
+                      Rating <SortIcon column="rating" />
+                    </th>
+                    <th
+                      className="sortable"
+                      onClick={() => handleSort("email")}
+                    >
+                      Email <SortIcon column="email" />
+                    </th>
+                    <th className="sortable" onClick={() => handleSort("date")}>
+                      Date <SortIcon column="date" />
+                    </th>
+                    <th className="actions-cell">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayedFeedbacks.map((feedback) => {
+                    const categoryInfo = getCategoryInfo(
+                      feedback.feedbacktype || feedback.category
+                    );
+                    const feedbackText = getFeedbackText(feedback);
+
+                    return (
+                      <tr
+                        key={feedback.id}
+                        className={
+                          selectedRows.includes(feedback.id) ? "selected" : ""
+                        }
+                      >
+                        <td className="checkbox-cell">
+                          <input
+                            type="checkbox"
+                            checked={selectedRows.includes(feedback.id)}
+                            onChange={() => handleSelectRow(feedback.id)}
+                          />
+                        </td>
+                        <td className="message-cell" title={feedbackText}>
+                          {feedbackText.length > 60
+                            ? `${feedbackText.substring(0, 60)}...`
+                            : feedbackText}
+                        </td>
+                        <td className="category-cell">
+                          <span
+                            className="category-badge"
+                            style={{
+                              backgroundColor: `${categoryInfo.color}15`,
+                              color: categoryInfo.color,
+                            }}
                           >
-                            <span className="category-icon">
+                            <span className="badge-icon">
                               {categoryInfo.icon}
                             </span>
-                            <span className="category-name">
-                              {categoryInfo.label}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="feedback-header-right">
-                          <div className="feedback-date">
-                            <span className="date-icon">🕒</span>
-                            {formatDate(
-                              feedback.created_at ||
-                                feedback.date ||
-                                feedback.timestamp ||
-                                feedback.createdAt
-                            )}
-                          </div>
-
-                          {/* Delete Button */}
-                          {!showConfirm && (
-                            <button
-                              className="delete-btn"
-                              onClick={(e) => handleDeleteClick(feedbackId, e)}
-                              disabled={isDeleting}
-                              title="Delete feedback"
-                            >
-                              {isDeleting ? (
-                                <span className="delete-spinner"></span>
-                              ) : (
-                                <span className="delete-icon">🗑️</span>
-                              )}
-                            </button>
-                          )}
-
-                          {/* Delete Confirmation */}
-                          {showConfirm && (
-                            <div className="delete-confirm">
-                              <span className="confirm-text">Delete?</span>
-                              <button
-                                className="confirm-yes"
-                                onClick={(e) =>
-                                  handleConfirmDelete(feedbackId, e)
-                                }
-                                disabled={isDeleting}
-                              >
-                                ✓
-                              </button>
-                              <button
-                                className="confirm-no"
-                                onClick={handleCancelDelete}
-                                disabled={isDeleting}
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="feedback-message">
-                        <p>
-                          {feedback.feedbacktext ||
-                            feedback.message ||
-                            feedback.text ||
-                            feedback.content ||
-                            "No message provided"}
-                        </p>
-                      </div>
-
-                      <div className="feedback-footer">
-                        <div className="feedback-rating">
-                          <span className="rating-label">Rating:</span>
-                          <div className="rating-stars">
+                            <span>{categoryInfo.label}</span>
+                          </span>
+                        </td>
+                        <td className="rating-cell">
+                          <div className="rating-stars-mini">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <span
                                 key={star}
-                                className={`star ${
+                                className={`star-mini ${
                                   star <= (feedback.rating || 0) ? "filled" : ""
                                 }`}
                               >
                                 ★
                               </span>
                             ))}
+                            <span className="rating-number">
+                              ({feedback.rating || 0})
+                            </span>
                           </div>
-                          <span className="rating-value">
-                            ({feedback.rating || 0}/5)
+                        </td>
+                        <td className="email-cell">
+                          <span className="email-value">
+                            {feedback.email || "Anonymous"}
                           </span>
-                        </div>
+                        </td>
+                        <td className="date-cell">
+                          {formatDate(feedback.created_at)}
+                        </td>
+                        <td className="actions-cell">
+                          {deletingId === feedback.id ? (
+                            <div className="inline-delete-confirm">
+                              <button
+                                className="confirm-delete"
+                                onClick={() => handleDelete(feedback.id)}
+                                disabled={isDeleting}
+                              >
+                                ✓
+                              </button>
+                              <button
+                                className="cancel-delete"
+                                onClick={() => setDeletingId(null)}
+                                disabled={isDeleting}
+                              >
+                                ✗
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              className="delete-row-btn"
+                              onClick={() => setDeletingId(feedback.id)}
+                              disabled={isDeleting}
+                              title="Delete"
+                            >
+                              🗑️
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
-                        <div className="feedback-email">
-                          <span className="email-icon">📧</span>
-                          <span
-                            className="email-text"
-                            title={feedback.email || "Anonymous"}
-                          >
-                            {feedback.email ||
-                              feedback.user_email ||
-                              "Anonymous"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </>
+            {/* Loading More */}
+            {isLoading && (
+              <div className="loading-more">
+                <div className="spinner-small"></div>
+                <p>Loading more feedback...</p>
+              </div>
             )}
-          </div>
-        )}
 
-        {/* Show More Button */}
-        {!isLoading && feedbacks.length > 0 && hasMore && (
-          <div className="show-more-container">
-            <button
-              className="show-more-btn"
-              onClick={handleShowMore}
-              disabled={isLoadingMore}
-            >
-              {isLoadingMore ? (
-                <>
-                  <span className="spinner-small"></span>
-                  Loading...
-                </>
-              ) : (
-                <>
+            {/* Show More Button */}
+            {hasMore && !isLoading && displayedFeedbacks.length > 0 && (
+              <div className="show-more-container">
+                <button className="show-more-btn" onClick={handleShowMore}>
                   <span className="btn-icon">➕</span>
-                  Show More ({ITEMS_PER_PAGE} more)
-                </>
-              )}
-            </button>
-            <p className="items-count">
-              Showing {feedbacks.length} of {totalCount || "many"} items
-            </p>
-          </div>
-        )}
-
-        {/* End of list message */}
-        {!isLoading && !hasMore && feedbacks.length > 0 && (
-          <div className="end-of-list">
-            <p>✨ You've seen all {feedbacks.length} feedback items ✨</p>
-          </div>
-        )}
-
-        {/* Loading More Indicator */}
-        {isLoadingMore && feedbacks.length > 0 && (
-          <div className="loading-more">
-            <div className="spinner-small"></div>
-            <span>Loading more feedback...</span>
-          </div>
+                  Show More
+                </button>
+                <p className="items-count">
+                  Showing {displayedFeedbacks.length} of {totalCount} items
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

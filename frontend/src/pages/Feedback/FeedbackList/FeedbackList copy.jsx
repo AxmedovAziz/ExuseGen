@@ -13,6 +13,16 @@ const FeedbackList = () => {
   const [hasMore, setHasMore] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
 
+  // Delete state
+  const [deletingId, setDeletingId] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // Authentication state
+  const [authLoading, setAuthLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const ITEMS_PER_PAGE = 10;
 
   // Categories with proper API value mapping
@@ -79,23 +89,36 @@ const FeedbackList = () => {
     };
   };
 
-  // Fetch feedbacks from API with filtering
+  // Fetch feedbacks from API with authentication
   const fetchFeedbacks = async (page = 1, category = "all") => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setError("No authentication token found. Please log in.");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
     try {
-      // Build URL with query parameters
       let url = `http://127.0.0.1:8000/api/excuses/feedback/?page=${page}&page_size=${ITEMS_PER_PAGE}`;
-
-      // Add category filter if not "all"
       if (category !== "all") {
         url += `&feedbacktype=${category}`;
       }
 
       console.log("Fetching URL:", url);
 
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 401) {
+        localStorage.removeItem("access_token");
+        navigate("/login");
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
@@ -104,25 +127,20 @@ const FeedbackList = () => {
       const data = await response.json();
       console.log("API Response:", data);
 
-      // Handle different API response structures
       let newFeedbacks = [];
       let total = 0;
 
       if (data.results) {
-        // If API returns paginated results
         newFeedbacks = data.results;
         total = data.count || data.results.length;
       } else if (Array.isArray(data)) {
-        // If API returns array directly
         newFeedbacks = data;
         total = data.length;
       } else {
-        // If API returns object with data property
         newFeedbacks = data.data || [];
         total = data.total || newFeedbacks.length;
       }
 
-      // Client-side filtering in case API doesn't filter properly
       if (category !== "all" && newFeedbacks.length > 0) {
         newFeedbacks = newFeedbacks.filter((f) => {
           const feedbackCategory = f.feedbacktype || f.category || "";
@@ -139,7 +157,6 @@ const FeedbackList = () => {
         setDisplayedFeedbacks((prev) => [...prev, ...newFeedbacks]);
       }
 
-      // Check if there are more items to load
       setHasMore(newFeedbacks.length === ITEMS_PER_PAGE);
       setTotalCount(total);
     } catch (err) {
@@ -150,10 +167,134 @@ const FeedbackList = () => {
     }
   };
 
-  // Load initial feedbacks on component mount
+  // Check user authentication and admin status
+  const checkAdminStatus = async () => {
+    const token = localStorage.getItem("access_token");
+
+    console.log("🔑 Token found:", token ? "YES" : "NO");
+    console.log("🔑 Token value:", token);
+
+    if (!token) {
+      setAuthLoading(false);
+      setIsAdmin(false);
+      navigate("/login");
+      return;
+    }
+
+    try {
+      console.log("📡 Calling /auth/me/ ...");
+
+      const response = await fetch("http://127.0.0.1:8000/auth/me/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log("📡 /auth/me/ response status:", response.status);
+
+      if (response.status === 401) {
+        console.warn("❌ 401 Unauthorized — token is invalid or expired");
+        localStorage.removeItem("access_token");
+        navigate("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch user info — status: ${response.status}`
+        );
+      }
+
+      const user = await response.json();
+
+      console.log(
+        "👤 Full /auth/me/ JSON response:",
+        JSON.stringify(user, null, 2)
+      );
+      console.log("👤 user.is_staff:", user.is_staff);
+      console.log("👤 user.is_superuser:", user.is_superuser);
+      console.log("👤 user.is_admin:", user.is_admin);
+      console.log("👤 user.role:", user.role);
+
+      const admin =
+        user.is_staff === true ||
+        user.is_superuser === true ||
+        user.is_admin === true ||
+        user.role === "admin" ||
+        user.role === "Admin";
+
+      console.log("✅ Final isAdmin value:", admin);
+
+      setIsAdmin(admin);
+    } catch (err) {
+      console.error("🔥 Auth check error:", err);
+      setIsAdmin(false);
+      setError("Failed to verify permissions.");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Delete feedback handler
+  const handleDelete = async (id) => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      setError("No authentication token found. Please log in.");
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/api/excuses/feedback/${id}/`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        localStorage.removeItem("access_token");
+        navigate("/login");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Delete failed: ${response.status}`);
+      }
+
+      // Remove from local state
+      const updatedFeedbacks = feedbacks.filter((f) => f.id !== id);
+      setFeedbacks(updatedFeedbacks);
+      setDisplayedFeedbacks(updatedFeedbacks);
+      setTotalCount((prev) => prev - 1);
+
+      setSuccessMessage("Feedback deleted successfully!");
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 3000);
+    } catch (err) {
+      setError(`Failed to delete feedback: ${err.message}`);
+      console.error("Delete error:", err);
+    } finally {
+      setIsDeleting(false);
+      setDeletingId(null);
+    }
+  };
+
+  // Load user info on mount
   useEffect(() => {
-    fetchFeedbacks(1, "all");
+    checkAdminStatus();
   }, []);
+
+  // Once admin is confirmed, fetch feedbacks
+  useEffect(() => {
+    if (isAdmin) {
+      fetchFeedbacks(1, "all");
+    }
+  }, [isAdmin]);
 
   // Handle category filter
   const handleCategoryFilter = (categoryId) => {
@@ -162,7 +303,6 @@ const FeedbackList = () => {
     setFeedbacks([]);
     setDisplayedFeedbacks([]);
 
-    // Get the API value for the selected category
     const selectedCat = categories.find((c) => c.id === categoryId);
     const apiCategory = selectedCat?.apiValue || "all";
 
@@ -174,13 +314,40 @@ const FeedbackList = () => {
     const nextPage = currentPage + 1;
     setCurrentPage(nextPage);
 
-    // Get the API value for the selected category
     const selectedCat = categories.find((c) => c.id === selectedCategory);
     const apiCategory = selectedCat?.apiValue || "all";
 
     fetchFeedbacks(nextPage, apiCategory);
   };
 
+  // If still checking authentication, show loading
+  if (authLoading) {
+    return (
+      <div className="auth-loading">
+        <div className="spinner"></div>
+        <p>Verifying access...</p>
+      </div>
+    );
+  }
+
+  // If not admin, show 403 Forbidden page
+  if (!isAdmin) {
+    return (
+      <div className="forbidden-page">
+        <div className="forbidden-card">
+          <div className="forbidden-icon">🚫</div>
+          <h1>403 - Access Denied for you ng</h1>
+          <p>U bchass Ng why the fuck u opened ts page,</p>
+          <p>ts shii is only for OG, u get urassss to homePage</p>
+          <button onClick={() => navigate("/")} className="back-home-btn">
+            Fuck off
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin view: render feedback list
   return (
     <div className="feedback-list-container">
       <div className="feedback-list-card">
@@ -197,6 +364,14 @@ const FeedbackList = () => {
             {totalCount} feedback {totalCount === 1 ? "item" : "items"} received
           </p>
         </div>
+
+        {/* Success Message */}
+        {showSuccess && (
+          <div className="success-message">
+            <span className="success-icon">✅</span>
+            {successMessage}
+          </div>
+        )}
 
         {/* Category Filters */}
         <div className="filters-section">
@@ -278,26 +453,51 @@ const FeedbackList = () => {
 
               return (
                 <div key={feedback.id || index} className="feedback-item">
-                  <div className="feedback-item-header">
-                    <div
-                      className="feedback-category"
-                      style={{
-                        backgroundColor: `${categoryInfo.color}20`,
-                        color: categoryInfo.color,
-                        borderLeft: `5px solid ${categoryInfo.color}`,
-                      }}
-                    >
-                      <span className="category-icon">{categoryInfo.icon}</span>
-                      <span className="category-name">
-                        {categoryInfo.label}
-                      </span>
+                  <div className="feedback-header">
+                    <div className="feedback-category-wrapper">
+                      <div
+                        className="feedback-category"
+                        style={{
+                          backgroundColor: `${categoryInfo.color}20`,
+                          color: categoryInfo.color,
+                          borderLeft: `5px solid ${categoryInfo.color}`,
+                        }}
+                      >
+                        <span className="category-icon">
+                          {categoryInfo.icon}
+                        </span>
+                        <span className="category-name">
+                          {categoryInfo.label}
+                        </span>
+                      </div>
                     </div>
-                    <div className="feedback-date">
-                      <span className="date-icon">🕒</span>
-                      {formatDate(
-                        feedback.created_at ||
-                          feedback.date ||
-                          feedback.timestamp
+                    <div className="feedback-header-right">
+                      {deletingId === feedback.id ? (
+                        <div className="delete-confirm">
+                          <span className="confirm-text">Delete?</span>
+                          <button
+                            className="confirm-yes"
+                            onClick={() => handleDelete(feedback.id)}
+                            disabled={isDeleting}
+                          >
+                            ✓
+                          </button>
+                          <button
+                            className="confirm-no"
+                            onClick={() => setDeletingId(null)}
+                            disabled={isDeleting}
+                          >
+                            ✗
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          className="delete-btn"
+                          onClick={() => setDeletingId(feedback.id)}
+                          disabled={isDeleting}
+                        >
+                          <span className="delete-icon">🗑️</span>
+                        </button>
                       )}
                     </div>
                   </div>

@@ -151,7 +151,8 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # Temporarily allow all
+        # 'rest_framework.permissions.AllowAny', # Temp orarily allow all
+        'rest_framework.permissions.IsAuthenticated',
     ]
 }
 

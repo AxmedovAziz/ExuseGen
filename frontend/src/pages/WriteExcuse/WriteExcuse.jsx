@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./WriteExcuse.scss";
-
+import useLastEmail from "../../hooks/useLastEmail";
 const WriteExcuse = () => {
   const navigate = useNavigate();
 
@@ -32,11 +32,23 @@ const WriteExcuse = () => {
   const [customCategories, setCustomCategories] = useState([]);
   const [isSending, setIsSending] = useState(false);
   const [sendSuccess, setSendSuccess] = useState(false);
+  const { lastEmail, loading } = useLastEmail();
   const [newCategory, setNewCategory] = useState({
     name: "",
     emoji: "📌",
   });
 
+  useEffect(() => {
+    if (lastEmail?.to) {
+      setEmailTo(lastEmail.to);
+    }
+    if (lastEmail?.subject) {
+      setFormData((prev) => ({
+        ...prev,
+        student_name: lastEmail.subject.replace("Excuse Note - ", "").trim(),
+      }));
+    }
+  }, [lastEmail]);
   // Category options - only these three
   const categoryOptions = [
     { id: "absent", name: "Absent", icon: "🚫", value: "absent" },

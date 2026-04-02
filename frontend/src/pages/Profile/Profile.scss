@@ -23,17 +23,17 @@ $profile-border-radius: 16px;
   }
 }
 
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba($profile-primary, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 10px rgba($profile-primary, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba($profile-primary, 0);
-  }
-}
+// @keyframes pulse {
+//   0% {
+//     box-shadow: 0 0 0 0 rgba($profile-primary, 0.4);
+//   }
+//   70% {
+//     box-shadow: 0 0 0 10px rgba($profile-primary, 0);
+//   }
+//   100% {
+//     box-shadow: 0 0 0 0 rgba($profile-primary, 0);
+//   }
+// }
 
 // Profile Styles
 .profile-container {
@@ -113,8 +113,22 @@ $profile-border-radius: 16px;
   color: white;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   position: relative;
-  animation: pulse 2s infinite;
+  overflow: hidden;
+  // animation: pulse 2s infinite;
+  img {
+    width: 100%; // ← ADD THIS
+    height: 100%; // ← ADD THIS
+    object-fit: cover; // ← ADD THIS
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: 50%;
+  }
 
+  span {
+    position: relative;
+    z-index: 1; // keeps fallback letter above image if image fails
+  }
   @media (max-width: 768px) {
     width: 80px;
     height: 80px;
@@ -608,5 +622,83 @@ $profile-border-radius: 16px;
 
   .registration-date {
     color: #212529;
+  }
+}
+
+.dev-section {
+  text-align: center;
+  padding: 20px;
+  background: #0f0f1a;
+  border-radius: 16px;
+  margin: 30px 0;
+  border: 1px solid #667eea;
+
+  p {
+    color: #cbd5e0;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+  }
+
+  .social-links {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+
+    a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      border-radius: 50px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      &.tg {
+        background: rgba(38, 165, 228, 0.1);
+        color: #26a5e4;
+        border: 1px solid rgba(38, 165, 228, 0.3);
+        &:hover {
+          background: #26a5e4;
+          color: white;
+          transform: translateY(-2px);
+        }
+      }
+
+      &.ig {
+        background: rgba(228, 64, 95, 0.1);
+        color: #e4405f;
+        border: 1px solid rgba(228, 64, 95, 0.3);
+        &:hover {
+          background: #e4405f;
+          color: white;
+          transform: translateY(-2px);
+        }
+      }
+
+      &.sc {
+        background: rgba(255, 252, 0, 0.1);
+        color: #fffc00;
+        border: 1px solid rgba(255, 252, 0, 0.3);
+        &:hover {
+          background: #fffc00;
+          color: black;
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+
+  small {
+    color: #718096;
+    font-size: 0.75rem;
   }
 }

@@ -22,6 +22,10 @@ urlpatterns = [
     
     path('email-history/', views.EmailHistoryView.as_view(), name='email_history'),
     
+    path("me/", views.MeView.as_view(), name="me"),
+    path('profile/me/', views.MeView.as_view(), name='profile_me'), 
+    
+    path('last-email/', views.LastSentEmailView.as_view(), name='last_email'),
     # User endpoints
     path('user/', views.current_user, name='current_user'),
     path('csrf/', views.get_csrf_token, name='get_csrf_token'),

@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import Login from "./pages/LoginAndRegister/Login";
 import Profile from "./pages/Profile/Profile";
-// import History from "./pages/History/History";
+import History from "./pages/History/History";
 import WriteExcuse from "./pages/WriteExcuse/WriteExcuse";
 import Feedback from "./pages/Feedback/Feedback";
 import GoogleCallback from "./pages/LoginAndRegister/GoogleCallback";
@@ -109,6 +109,7 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Navigate to="/login" />} />
         <Route
           path="/login"
@@ -123,6 +124,7 @@ function App() {
         <Route path="/feedback-list" element={<FeedbackList />} />
         <Route path="/feedback" element={<Feedback user={user} />} />
 
+        {/* Protected routes */}
         <Route element={<ProtectedRoutes user={user} />}>
           <Route path="/email-history" element={<EmailHistory />} />
           <Route
@@ -130,8 +132,8 @@ function App() {
             element={<Profile user={user} handleLogout={handleLogout} />}
           />
           <Route path="/history" element={<History />} />
-          <Route path="/write-excuse" element={<WriteExcuse user={user} />} />
           <Route path="/security" element={<SecurityPage />} />
+          <Route path="/write-excuse" element={<WriteExcuse user={user} />} />
         </Route>
       </Routes>
     </Router>

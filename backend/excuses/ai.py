@@ -2,7 +2,7 @@ import requests
 import json
 import re
 
-TOKEN = "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"  # ⚠️ regenerate this
+TOKEN = "REDACTED"  # ⚠️ regenerate this
 ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 MODEL = "deepseek/deepseek-chat"  # cheaper + good
 
