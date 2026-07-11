@@ -121,7 +121,7 @@ const Feedback = ({ user }) => {
               Thank You, {user?.username || "User"}!
             </h1>
             <p className="feedback-subtitle">
-              Your feedback helps make this app better
+               Your feedback helps make this app better
             </p>
           </div>
 
