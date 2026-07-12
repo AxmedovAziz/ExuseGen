@@ -1,8 +1,9 @@
 import requests
 import json
 import re
+from decouple import config
 
-TOKEN = "REDACTED"  # ⚠️ regenerate this
+TOKEN = config("AI_API_KEY")
 ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 MODEL = "deepseek/deepseek-chat"  # cheaper + good
 
